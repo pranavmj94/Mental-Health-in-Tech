@@ -1,0 +1,38 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Observable Embedded Cell Example</title>
+  </head>
+  <body>
+ 
+   <div id="map"></div>
+   <div id="map1"></div>
+   <p id="viewof-airline"></p>
+
+<script type="module">
+
+import {Runtime, Inspector} from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@4/dist/runtime.js";
+import notebook from "https://api.observablehq.com/@pranavmj94/interaction-with-vega-lite.js?v=3";
+
+const renders = {
+    "viewof type": "#viewof-airline",
+    "map": "#map",
+    "map1": "#map1",
+  };
+
+new Runtime().module(notebook, name => {
+  if (name === "viewof type") {
+    return new Inspector(document.querySelector("#viewof-airline"));
+  }
+  else if(name === "map") {
+    return new Inspector(document.querySelector("#map"));
+  }
+  else if(name === "map1") {
+    return new Inspector(document.querySelector("#map1"));
+  }
+});
+</script>  </body>
+</html>
+

@@ -140,6 +140,14 @@
       margin-left: 7%;
     }
 
+    a {
+      color: #fff;
+    }
+
+    #orange a {
+      color: #db7923;
+    }
+
 
 </style>
 
@@ -151,6 +159,8 @@
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="js/wordcloud.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="./inspector.css">
 
 <script>
 $(function() {
@@ -182,7 +192,7 @@ $(function() {
             <div id="hello_text">
             <p>by Lera Neviadomska, Pranav Mahajan</p>
             <br>
-            <p>Process Book | Project Video </p>
+            <p><a href="https://docs.google.com/presentation/d/1-tnwPScX0LvBXgdwiBjwzr5hoI6HWqwz6kHoIRfw1co/edit?usp=sharing">Process Book</a> | <a href="https://www.youtube.com/watch?v=aoBzLnJS1g0&feature=youtu.be">Project Video</a> </p>
             </div>
           </div>
           </div>
@@ -197,7 +207,49 @@ $(function() {
           <div id="quote">
           <p>"OSMI board members and volunteers bring their time and expertise to bear on this important issue by organizing efforts to change experiences of those with mental health disorders in the tech workplace." </p>
           </div>
+          <div id="orange">
+            <a href="https://osmihelp.org/">Read more about OSMI here.</a>
+          </div>
         </div>
+
+        <div id="graph_block">
+          <div id="padding">
+                <h2>The Demographics of the Survey</h2>
+                <p>Not all the people who took the survey experience mental health issues. Use the drop down menu below to explore the percentage of surveyed people that currently or previously suffered from mental health issues. You can also explore the average age of the responders who experienced mental health issues at any given point in time. All of the people on the visual work in the tech industry. </p>
+                <br>
+                <p id="viewof-airline"></p>
+                <br>
+
+                <div id="map"></div>
+                <div id="map1"></div>
+              
+                  <script type="module">
+
+                    import {Runtime, Inspector} from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@4/dist/runtime.js";
+                    import notebook from "https://api.observablehq.com/@pranavmj94/interaction-with-vega-lite.js?v=3";
+
+                    const renders = {
+                        "viewof type": "#viewof-airline",
+                        "map": "#map",
+                        "map1": "#map1",
+                      };
+
+                    new Runtime().module(notebook, name => {
+                      if (name === "viewof type") {
+                        return new Inspector(document.querySelector("#viewof-airline"));
+                      }
+                      else if(name === "map") {
+                        return new Inspector(document.querySelector("#map"));
+                      }
+                      else if(name === "map1") {
+                        return new Inspector(document.querySelector("#map1"));
+                      }
+                    });
+                  </script>
+          </div>
+        </div>
+        </br>
+        </br>
 
         <div style="background-image: url('gr.jpg');background-repeat: no-repeat;background-attachment: fixed;
   background-size: cover; height:650px">
@@ -539,6 +591,7 @@ $(function() {
       // remapping data
       data.forEach(function(d, i) 
       {
+          d.population = +d.population
           d.units = Math.floor(d.population/squareValue);
           theData = theData.concat(
             Array(d.units+1).join(1).split('').map(function()
@@ -610,7 +663,7 @@ $(function() {
       legend.append("text")
         .attr("x", 25)
         .attr("y", 13)
-        .text( function(d) { return d.disorder + " | " + d.units + "%"})
+        .text( function(d) { return d.disorder + " | " + Math.floor(d.population/total*100) + "%"})
         .style("color", "#000");
     });
 
