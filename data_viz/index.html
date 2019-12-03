@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8">
+
+<style>
+
+  body {
+    font-size: 20px;
+    font-family: "Helvetica Neue";
+    background-color: #fff;
+  }
+
+  p {
+    margin: 0;
+  }
+    
+  #waffle {
+    margin-bottom: 30px;
+  }
+
+  #legend {
+    font: 13px Arial;
+  }
+
+  #div_template {
+    width: 100%;
+    background-color: #222;
+  }
+
+  #div_template2 {
+    width: 100%;
+    background-color: #fff;
+    margin-left: 30%;
+  }
+
+  svg {
+    margin-left: 10%;
+  }
+
+  #graph_block {
+  /*  margin-left: 7em;*/
+  /*  padding-left: 10%;
+    padding-right: 10%;*/
+  }
+
+  #padding {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+
+  #people_block {
+    background-color: #111;
+  /*  padding-left: 10%;
+    padding-right: 10%;*/
+    height: 750px;
+    font-size: 16px;
+  }
+
+  #white_text {
+    color: #ddd;
+  }
+
+  #hello {
+    width: 100%;
+    text-align: center;
+  }
+
+  #hello_text p {
+    color: #fff;
+    opacity: 1;
+  }
+
+  h2 {
+    font-style: normal;
+    color: #444;
+    font-size: 40px;
+  }
+
+  h3{
+    color: #666;
+  }
+
+  #intro {
+    /*font-variant: small-caps;*/
+    font-family: "Helvetica Neue";
+    font-style: light;
+    width: 60%;
+    margin-top: 3em;
+    padding-left: 10%;
+    margin-bottom: 3em;
+  }
+
+  #quote {
+    color: #888;
+    padding: 1em;
+    font-size: 22px;
+    font-style: italic;
+    /*background-color: #c9a473;*/
+  }
+
+  h1 {
+    color: #fff;
+    opacity: 1;
+  }
+
+  html, body {
+    height: 100%;
+  }
+  body {
+    color: #000;
+  }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .point {
+      fill: orange;
+    }
+
+    .point:hover {
+      fill: orangered;
+    }
+
+    #transbox {
+        position: absolute;
+        top: 33%;
+        margin: 0 auto;
+        width: 94.7%;
+        padding: 2%;
+        background-color: #080808;
+        opacity: 0.6;
+    }
+
+    form {
+      margin-left: 7%;
+    }
+
+
+</style>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.mousewheel.min.js"></script>
+<script src="js/jquery.easing.js"></script>
+<script src="js/jquery.singular.js"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="js/wordcloud.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script>
+$(function() {
+    $('.js-singular').singular({
+        section: '.mod-singular-section',
+        nav: '.js-singular-nav',
+        prev: '.js-singular-prev',
+        next: '.js-singular-next',
+        navActiveClass: 'js-singular-active',
+        scrollSpeed: 1000,
+        mousewheel: true,
+        easing: 'easeInOutQuart',
+        scrollEnd: function(elem) {
+        }
+    });
+});
+</script>
+
+</head>
+
+<body>
+          
+        <div id ="hello">
+          <!-- picture from https://techcrunch.com/2019/07/20/startups-weekly-the-opportunities-challenges-for-mental-health-tech/-->
+          <div style="background-image: url('og.jpeg');background-repeat: no-repeat;background-attachment: fixed;
+  background-size: cover; height:700px">
+          <div id="transbox">
+            <h1>Mental Health in Tech Industry</h1>
+            <div id="hello_text">
+            <p>by Lera Neviadomska, Pranav Mahajan</p>
+            <br>
+            <p>Process Book | Project Video </p>
+            </div>
+          </div>
+          </div>
+        </div> 
+
+        <div id="intro">
+          <!--Project Description-->
+          <h2>About the Project</h2>
+
+          <p><b>Open Sourcing Mental Illness</b> is a non-profit, corporation dedicated to raising awareness, educating, and providing resources to support mental wellness in the tech and open source communities. Every year, OSMI conducts surveys and research to study the current state of attitudes of tech industry towards mental health.</p><br>
+
+          <div id="quote">
+          <p>"OSMI board members and volunteers bring their time and expertise to bear on this important issue by organizing efforts to change experiences of those with mental health disorders in the tech workplace." </p>
+          </div>
+        </div>
+
+        <div style="background-image: url('gr.jpg');background-repeat: no-repeat;background-attachment: fixed;
+  background-size: cover; height:650px">
+          <div id="graph_block">
+            <div id="padding">
+              </br>
+                <h2>Most Common Mental Health Disorders</h2>
+                <p>According to the survey, the breakdown of mental disorders that surveyed people experience are as following:</p>
+            </div>
+                  <!--Rendering waffle chart here-->
+                  <div id="waffle"></div>
+                  <div id="legend"></div>
+          </div>
+        </div>
+
+        <!--Rendering pie charts here-->
+        <!--Based on https://www.tutorialsteacher.com/d3js/create-pie-chart-using-d3js -->
+        <div id="graph_block">
+          <div id="padding">
+            </br>
+              <h2>Employer's Mental Health Attitudes</h2>
+              <p>The surveyed audience was asked about the mental resources that employers provide. Specifically, questions about the availability of mental health benefits in the healthcare coverage and official communication presence were asked. Here is what people said:</p>
+              <h3>Mental Health Benefits</h3>
+          </div>
+
+          <script>
+            // counts from data pre-processing
+            var newData = [{
+                count: 1103,
+                label: "Yes"
+              }, {
+                count: 571,
+                label: "I don't know"
+              }, {
+                count: 476,
+                label: "No"
+              }, 
+            ]
+
+            var width = 1100,
+              height = 300,
+              radius = Math.min(width, height) / 2.5;
+
+            var color = d3.scale.category20();
+
+            // defining arc ranges
+            var arcText = d3.scale.ordinal()
+              .rangeRoundBands([0, width], .1, .3);
+
+            var arc = d3.svg.arc()
+              .innerRadius(radius - 130)
+              .outerRadius(radius - 10);
+
+            // creating the donut pie chart layout
+            var pie = d3.layout.pie()
+              .value(function(d) {
+                return d.count;
+              })
+              .sort(null);
+
+            // appending SVG attributes and g to the SVG
+            var mySvg = d3.select('body').append("svg")
+              .attr("width", width)
+              .attr("height", height);
+
+            var svg = mySvg
+              .append("g")
+              .attr("transform", "translate(" + radius + "," + radius + ")");
+
+            var svgText = mySvg
+              .append("g")
+              .attr("transform", "translate(" + radius + "," + radius + ")");
+
+            // the inner donut circle
+            svg.append("circle")
+              .attr("cx", 0)
+              .attr("cy", 0)
+              .attr("r", 100)
+              .attr("fill", "#fff");
+
+            var g = svg.selectAll(".arc")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("class", "arc");
+
+            // appending the path to each g
+            g.append("path")
+              .attr("d", arc)
+              .attr("fill", function(d, i) {
+                return color(i);
+              });
+
+            var textG = svg.selectAll(".labels")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("class", "labels");
+
+            textG.append("text")
+              .attr("transform", function(d) {
+                return "translate(" + arc.centroid(d) + ")";
+              })
+              .attr("dy", ".35em")
+              .style("text-anchor", "middle")
+              .style("font-size", "16px")
+              .attr("fill", "#fff")
+              .text(function(d, i) {
+                return d.data.count > 0 ? d.data.label : '';
+              });
+            
+            // creating legend for the chart
+            var legendG = mySvg.selectAll(".legend")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("transform", function(d,i){
+                return "translate(" + (width - 810) + "," + (i * 15 + 65) + ")";
+                //offsetting the legend 
+              })
+              .attr("class", "legend");   
+            
+            legendG.append("rect")
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("fill", function(d, i) {
+                return color(i);
+              });
+            
+            legendG.append("text")
+              .text(function(d){
+                return Math.floor(d.value/2151*100) + "%  " + d.data.label;
+                // percentages conversion
+              })
+              .style("font-size", 12)
+              .attr("y", 10)
+              .attr("x", 11);
+
+            var desc = mySvg.selectAll(".desc")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("transform", function(d,i){
+                return "translate(" + (width-820) + "," + (130) + ")";
+              });
+            
+            desc.append("text")
+              .text("According to the graph, 51% of all employers cover mental health as a part of the offered healthcare packet.")
+              .style("font-size", 14)
+              .attr("y", 10)
+              .attr("x", 11);
+            
+          </script>
+
+          </div>
+
+          <div id="padding">
+            <h3>Mental Health Communication</h3>
+          </div>
+
+          <script>
+          // same code as above!
+
+            // counts from data pre-processing
+            var newData = [{
+                count: 495,
+                label: "Yes"
+              }, {
+                count: 206,
+                label: "I don't know"
+              }, {
+                count: 1450,
+                label: "No"
+              }, 
+            ]
+
+            var width = 1100,
+              height = 300,
+              radius = Math.min(width, height) / 2.5;
+
+            var color = d3.scale.category20();
+
+            var arcText = d3.scale.ordinal()
+              .rangeRoundBands([0, width], .1, .3);
+
+            var arc = d3.svg.arc()
+              .innerRadius(radius - 130)
+              .outerRadius(radius - 10);
+
+            var pie = d3.layout.pie()
+              .value(function(d) {
+                return d.count;
+              })
+              .sort(null);
+
+            var mySvg = d3.select('body').append("svg")
+              .attr("width", width)
+              .attr("height", height);
+
+            var svg = mySvg
+              .append("g")
+              .attr("transform", "translate(" + radius + "," + radius + ")");
+
+            var svgText = mySvg
+              .append("g")
+              .attr("transform", "translate(" + radius + "," + radius + ")");
+
+            svg.append("circle")
+              .attr("cx", 0)
+              .attr("cy", 0)
+              .attr("r", 100)
+              .attr("fill", "#fff");
+
+            var g = svg.selectAll(".arc")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("class", "arc");
+
+            g.append("path")
+              .attr("d", arc)
+              .attr("fill", function(d, i) {
+                return color(i);
+              });
+
+            var textG = svg.selectAll(".labels")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("class", "labels");
+
+            textG.append("text")
+              .attr("transform", function(d) {
+                return "translate(" + arc.centroid(d) + ")";
+              })
+              .attr("dy", ".35em")
+              .style("text-anchor", "middle")
+              .style("font-size", "16px")
+              .attr("fill", "#fff")
+              .text(function(d, i) {
+                return d.data.count > 0 ? d.data.label : '';
+              });
+            
+            var legendG = mySvg.selectAll(".legend")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("transform", function(d,i){
+                return "translate(" + (width - 810) + "," + (i * 15 + 65) + ")";
+              })
+              .attr("class", "legend");   
+            
+            legendG.append("rect")
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("fill", function(d, i) {
+                return color(i);
+              });
+            
+            legendG.append("text")
+              .text(function(d){
+                return Math.floor(d.value/2151*100) + "%  " + d.data.label;
+              })
+              .style("font-size", 12)
+              .attr("y", 10)
+              .attr("x", 11);
+
+            var desc = mySvg.selectAll(".desc")
+              .data(pie(newData))
+              .enter().append("g")
+              .attr("transform", function(d,i){
+                return "translate(" + (width-820) + "," + (130) + ")";
+              });
+            
+            desc.append("text")
+              .text("According to the graph, only 23% of employers has ever formally discussed mental health through official communication.")
+              .style("font-size", 14)
+              .attr("y", 10)
+              .attr("x", 11);
+        
+          </script>
+
+        </div>
+
+        <!-- The "people" graph -->
+        <div id="people_block">
+          <br>
+          <div id="white_text">
+            <div id="padding">
+              <h2>Hear the stories</h2>
+              <p>Some responders shared their experiences, where either them or their colleagues experiences a bad response when trying to share their mental health condition in their workplace. Hover over the dots to hear the voices of people who had bad experiences with stigmas related to mental health.</p>
+            </div>
+          </div>
+
+          <!--People graph rendering here-->
+          <br>
+          <div id = "div_template"></div>
+          <br>
+
+        </div>
+        </br>
+
+        <!-- The suggestion graph -->
+
+        <div id="graph_block">
+          <div id="padding">
+            <h2>How can we fix the situation?</h2>
+            <p>The problem presence is apparent, but what can be done to fix it? Below are the most common suggestions that were mentioned by people who took the survey.</p>
+          </div>
+
+          <!--Suggestion graph rendering here-->
+          <div id = "div_template2"></div>
+        </div>
+
+        </div>
+      </div>
+
+<!--Loading color library-->
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+
+<!-- Referred from http://bl.ocks.org/XavierGimenez/8070956 -->
+  <script>
+
+    // Waffle Chart
+    var total = 0;
+    var width,
+        height,
+        widthSquares = 36,
+        heightSquares = 5,
+        squareSize = 28,
+        squareValue = 0,
+        gap = 1,
+        theData = [];  
+      
+    var fill = d3.scale.category20b();
+
+    d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSOWkvZuGzGICcEaEwrH3qWJVDax52ns9czpN7rIARNBbOWkdsIKIlxBLOQGge78kUE0CFrfLECyQH9/pub?output=csv", function(error, data)
+
+    {
+      // total
+      total = d3.sum(data, function(d) { return d.population; });
+
+      // value of a square
+      squareValue = total / (widthSquares*heightSquares);
+      
+      // remapping data
+      data.forEach(function(d, i) 
+      {
+          d.units = Math.floor(d.population/squareValue);
+          theData = theData.concat(
+            Array(d.units+1).join(1).split('').map(function()
+              {
+                return {  squareValue:squareValue,                      
+                          units: d.units,
+                          population: d.population,
+                          groupIndex: i};
+              })
+            );
+      });
+
+      width = (squareSize*widthSquares) + widthSquares*gap + 25;
+      height = (squareSize*heightSquares) + heightSquares*gap + 25;
+
+      // initializing waffle pattern
+      var waffle = d3.select("#waffle")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .append("g")
+          .selectAll("div")
+          .data(theData)
+          .enter()
+          .append("rect")
+          .attr("width", squareSize)
+          .attr("height", squareSize)
+          .attr("fill", function(d)
+          {
+            return fill(d.groupIndex);
+          })
+          .attr("x", function(d, i)
+            {
+              //group n squares for column
+              col = Math.floor(i/heightSquares);
+              return (col*squareSize) + (col*gap);
+            })
+          .attr("y", function(d, i)
+          {
+            // calculating row coordinates
+            row = i%heightSquares;
+            return (heightSquares*squareSize) - ((row*squareSize) + (row*gap))
+          })
+          .append("title")
+          .text(function (d,i) {
+            // text visible when hovering
+            return "Disorders: " + data[d.groupIndex].disorder + " | " +  d.population + " , " + d.units + "%"
+          });
+
+       // add legend 
+       var legend = d3.select("#legend")
+        .append("svg")
+        .attr('width', 400)
+        .attr('height', 200)
+        .append('g')
+        .selectAll("div")
+        .data(data)
+        .enter()
+          .append("g")
+          .attr('transform', function(d,i){ return "translate(0," + i*20 + ")";});
+
+      // adding rectangles
+      legend.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", function(d, i) { return fill(i)});
+
+      // adding text description
+      legend.append("text")
+        .attr("x", 25)
+        .attr("y", 13)
+        .text( function(d) { return d.disorder + " | " + d.units + "%"})
+        .style("color", "#000");
+    });
+
+  </script>
+
+  <script>
+
+  // "People" chart
+    var margin = { top: 20, right: 20, bottom: 30, left: 40 },
+      width = 1000 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+    var x = d3.scale.linear().range([0, width]);
+
+    var y = d3.scale.linear().range([height, 0]);
+
+    var svg1 = d3
+      .select("#div_template")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv(
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRV-ENCVgANYqmjS8CbbJzCo2Atmcyt_cnlMxOorP0FWDt_f1WIQqDmakDG-EIOV9eepUxKQazCfHOI/pub?output=csv",
+      function(error, data) {
+        if (error) throw error;
+
+        //https://docs.google.com/spreadsheets/d/e/2PACX-1vRV-ENCVgANYqmjS8CbbJzCo2Atmcyt_cnlMxOorP0FWDt_f1WIQqDmakDG-EIOV9eepUxKQazCfHOI/pub?output=csv
+
+        // Coerce the strings to numbers.
+        data.forEach(function(d) {
+          d.x = Math.random();
+          d.y = Math.random();
+          if (d.long_answer != null && d.long_answer.length > 0) {
+            d.answer = d.long_answer;
+          } else {
+            d.answer = "";
+          }
+          //d.link = "https://image.flaticon.com/icons/png/512/10/10522.png"
+        });
+
+        x.domain(
+          d3.extent(data, function(d) {
+            return d.x;
+          })
+        ).nice();
+        y.domain(
+          d3.extent(data, function(d) {
+            return d.y;
+          })
+        ).nice();
+ 
+        // tooltip created with this reference: https://www.d3-graph-gallery.com/graph/interactivity_tooltip.html
+
+        var Tooltip = d3
+          .select("#div_template")
+          .append("div")
+          .style("opacity", 0)
+          .attr("class", "tooltip")
+          .style("background-color", "white")
+          .style("border", "solid")
+          .style("border-width", "2px")
+          .style("border-radius", "5px")
+          .style("padding", "5px")
+          .style("width", "300px")
+          .style("font-size", "12px")
+          .style("position", "absolute")
+          .style("z-index", "10");
+
+        // three functions that change the tooltip when user hover / move / leave a cell
+        var mouseover = function(d) {
+          Tooltip.style("opacity", 1)
+            .style("left", d3.mouse(this)[0] + 100 + "px")
+            .style("top", d3.mouse(this)[1] + 100 + "px");
+          d3.select(this)
+            .style("stroke", "black")
+            .style("opacity", 1);
+        };
+        var mousemove = function(d) {
+          Tooltip.html("" + d.answer)
+            .style("left", event.pageX - 10 + "px")
+            .style("top", event.pageY + 10 + "px");
+        };
+        var mouseleave = function(d) {
+          Tooltip.style("opacity", 0);
+          d3.select(this)
+            .style("stroke", "none")
+            .style("opacity", 0.8);
+        };
+
+        // adding the points!
+        svg1
+          .selectAll(".point")
+          .data(data)
+          .enter()
+          .append("path")
+          .filter(function(d) { return d.answer != ""})
+          //.append('image') * wish that worked but oh well *
+          //.attr("xlink:href", function(d){ return d.link })
+          .attr("class", "point")
+          .attr("d", d3.svg.symbol().type("circle"))
+          .attr("transform", function(d) {
+            return "translate(" + x(d.x) + "," + y(d.y) + ")";
+          })
+          .on("mouseover", mouseover)
+          .on("mousemove", mousemove)
+          .on("mouseleave", mouseleave);
+      }
+    );
+  </script>
+
+  <script>
+
+  // Word Cloud
+  // based on https://www.d3-graph-gallery.com/graph/wordcloud_size.html
+
+    var fill = d3.scale.category20b();
+
+    // counts from data pre-processing
+    var data = [{word:"treat as physical health",weight:20},{word:"talk about it",weight:58},{word:"mental health days",weight:5},{word:"remove the stigma",weight:14},{word:"no overtime/work-life balance",weight:6},{word:"raise awareness",weight:18},{word:"education",weight:5},{word:"discussion",weight:19},{word:"work from home",weight:6},{word:"be open",weight:52},{word:"time off",weight:8},{word:"health benefits",weight:7},{word:"culture",weight:10},{word:"health days",weight:8}];
+    
+    var margin = {top: 100, right: 20, bottom: 100, left: 100},
+      width = 1100 - margin.left - margin.right,
+      height = 700 - margin.top - margin.bottom;
+
+    var svg2 = d3.select("#div_template2").append("svg2")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      
+    d3.layout.cloud().size([1100, 700])
+          .words(data.map(function(d) {
+            return {text: d.word, size: d.weight};
+          }))
+          .padding(5)
+          .rotate(function() { return ~~(Math.random() * 2) * 90; })
+          .font("Arial")
+          .fontSize(function(d) { return d.size+10; })
+          .on("end", draw)
+          .start();
+
+    function draw(words) {
+        d3.select("body").append("svg")
+          .attr("width", 1000)
+          .attr("height", 600)
+        .append("g")
+          .attr("transform", "translate(150,150)")
+        .selectAll("text")
+          .data(words)
+        .enter().append("text")
+          .style("font-size", function(d) { return d.size + "px"; })
+          .style("font-family", "Arial")
+          .style("font-style", "bold")
+          .style("fill", function(d, i) { return fill(i); })
+          .attr("text-anchor", "middle")
+          .attr("transform", function(d) {
+            return "translate(" + [d.x+100, d.y+100] + ")rotate(" + d.rotate + ")";
+          })
+          .text(function(d) { return d.text; });
+    }
+
+    d3.select("svg2")
+      .selectAll("g")
+        .attr("transform", "translate(150,150)")
+      .selectAll("text")
+        .data(words).enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+
+        .attr("transform", function(d) {
+
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+
+  </script>
+
+</body>
+</html>
